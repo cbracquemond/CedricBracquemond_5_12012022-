@@ -96,5 +96,5 @@ function buttonClick (kanap) {
             altTxt: kanap.altTxt
         }
         localStorage.setItem(id, JSON.stringify(product))
-    })
+    }, false )
 }
