@@ -66,17 +66,7 @@ function createInput(item) {
     return input
 }
 
-function updateCart(input, id) {
-    input.addEventListener("input", e => {
-        let storageUpdate = localStorage.getItem(id)
-        storageUpdate = JSON.parse(storageUpdate)
-        storageUpdate.quantity = Number(input.value)
-        localStorage.setItem(id, JSON.stringify(storageUpdate))
-        const cartUpdate = cart.find(item => item.id === id)
-        cartUpdate.quantity = Number(input.value)
-        createTotal(cart)
-    })
-}
+
 
 function createQuantity (item) {
     const quantity = document.createElement("div")
@@ -84,7 +74,6 @@ function createQuantity (item) {
     quantity.appendChild(createQte())
     const input = (createInput(item))
     quantity.appendChild(input)
-    updateCart(input, item.id)
     return quantity
 }
 
@@ -117,17 +106,6 @@ function createProducts (item, kanap) {
     content.appendChild(createItemSetting(item))
 }
 
-function deleteProduct() {
-    const buttons = document.querySelectorAll(".cart__item__content__settings__delete")
-    buttons.forEach((button) => {
-        button.addEventListener("click", event => {
-            const article = event.target.parentNode.parentNode.parentNode.parentNode
-            article.remove()
-            localStorage.removeItem(article.getAttribute("data-id"))
-        } , false )
-        
-    })
-}
 
 function totalQuantity(cart) {
     let totalQty = 0
@@ -135,6 +113,11 @@ function totalQuantity(cart) {
         totalQty += item.quantity 
     })
     return totalQty
+}
+
+function findKanap(item, data) {
+    const kanap = data.find(element => element._id === item.id)
+    return kanap
 }
 
 function totalPrice(cart, data) {
@@ -151,19 +134,44 @@ function createTotal(cart, data) {
     document.querySelector("#totalPrice").innerText = totalPrice(cart, data)
 }
 
-function findKanap(item, data) {
-    const kanap = data.find(element => element._id === item.id)
-    return kanap
+function updateCart(item, data) {
+    const inputs = document.querySelectorAll(".itemQuantity")
+    inputs.forEach(input => {
+        input.addEventListener("input", e => {
+            const itemKey = item.id + item.color
+            let storageUpdate = localStorage.getItem(itemKey)
+            console.log(storageUpdate)
+            storageUpdate = JSON.parse(storageUpdate)
+            storageUpdate.quantity = Number(input.value)
+            localStorage.setItem(itemKey, JSON.stringify(storageUpdate))
+            item.quantity = Number(input.value)
+            createTotal(cart, data)
+        });
+    })
+}
+
+function deleteProduct() {
+    const buttons = document.querySelectorAll(".cart__item__content__settings__delete")
+    console.log(buttons)
+    buttons.forEach((button) => {
+        button.addEventListener("click", event => {
+            const article = event.target.parentNode.parentNode.parentNode.parentNode
+            article.remove()
+            localStorage.removeItem(article.getAttribute("data-id"))
+        } , false )
+    })
 }
 
 const cart = getItems()
 fetch(`http://localhost:3000/api/products/`)
-    .then((response) => response.json())
-    .then((data => {
-        cart.forEach(item => {
-            const kanap = findKanap(item, data)
-            createProducts(item, kanap)
-        });
-        createTotal(cart, data)
-    }))
+.then((response) => response.json())
+.then((data => {
+    cart.forEach(item => {
+        const kanap = findKanap(item, data)
+        createProducts(item, kanap)
+        updateCart(item, data)
+    });
+    createTotal(cart, data)
+}))
+
 deleteProduct()

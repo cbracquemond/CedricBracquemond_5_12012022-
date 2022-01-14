@@ -86,11 +86,13 @@ function buttonClick (kanap) {
     button.addEventListener("click", e => {
         const color = document.querySelector("#colors").value
         const quantity = document.querySelector("#quantity").value
+        const key = id + color
         const product = {
             id: kanap._id,
             color: color,
             quantity: Number(quantity),
         }
-        localStorage.setItem(id, JSON.stringify(product))
+        
+        localStorage.setItem(key, JSON.stringify(product))
     }, false )
 }
