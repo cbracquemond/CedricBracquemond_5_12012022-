@@ -17,12 +17,12 @@ function createArticle (item) {
     return article
 }
 
-function createImage (item) {
+function createImage (kanap) {
     const slot = document.createElement("div")
     slot.classList.add("cart__item__img")
     const image = document.createElement("img")
-    image.src = item.imageUrl
-    image.alt = item.altTxt
+    image.src = kanap.imageUrl
+    image.alt = kanap.altTxt
     slot.appendChild(image)
     return slot
     
@@ -34,15 +34,15 @@ function createItemContent () {
     return content
 }
 
-function createItemDescription (item) {
+function createItemDescription (item, kanap) {
     const description = document.createElement("div")
     description.classList.add("cart__item__content__description")
     const h2 = document.createElement("h2")
-    h2.innerText = `${item.name}`
+    h2.innerText = `${kanap.name}`
     const color = document.createElement("p")
     color.innerText = `${item.color}`
     const price = document.createElement("p")
-    price.innerText = `${item.price} €`
+    price.innerText = `${kanap.price} €`
     description.appendChild(h2)
     description.appendChild(color)
     description.appendChild(price)
@@ -106,14 +106,14 @@ function createItemSetting(item) {
     return setting
 }
 
-function createProducts (item) {
+function createProducts (item, kanap) {
     const section = document.querySelector("#cart__items")
     const article = createArticle (item)
-    const content = createItemContent()
     section.appendChild(article)
-    article.appendChild(createImage (item))
+    article.appendChild(createImage (kanap))
+    const content = createItemContent()
     article.appendChild(content)
-    content.appendChild(createItemDescription(item))
+    content.appendChild(createItemDescription(item, kanap))
     content.appendChild(createItemSetting(item))
 }
 
@@ -137,21 +137,33 @@ function totalQuantity(cart) {
     return totalQty
 }
 
-function totalPrice(cart) {
+function totalPrice(cart, data) {
     let priceTotal = 0
     cart.forEach(item => {
-        priceTotal += item.quantity * item.price
+        const kanap = findKanap(item, data)
+        priceTotal += item.quantity * kanap.price
     });
     return priceTotal
 }
 
-function createTotal(cart) {
+function createTotal(cart, data) {
     document.querySelector("#totalQuantity").innerText = totalQuantity(cart)
-    document.querySelector("#totalPrice").innerText = totalPrice(cart)
+    document.querySelector("#totalPrice").innerText = totalPrice(cart, data)
 }
 
+function findKanap(item, data) {
+    const kanap = data.find(element => element._id === item.id)
+    return kanap
+}
 
 const cart = getItems()
-cart.forEach(item => createProducts(item));
-createTotal(cart)
+fetch(`http://localhost:3000/api/products/`)
+    .then((response) => response.json())
+    .then((data => {
+        cart.forEach(item => {
+            const kanap = findKanap(item, data)
+            createProducts(item, kanap)
+        });
+        createTotal(cart, data)
+    }))
 deleteProduct()

@@ -87,13 +87,9 @@ function buttonClick (kanap) {
         const color = document.querySelector("#colors").value
         const quantity = document.querySelector("#quantity").value
         const product = {
-            name: kanap.name,
-            price: kanap.price,
             id: kanap._id,
             color: color,
             quantity: Number(quantity),
-            imageUrl: kanap.imageUrl,
-            altTxt: kanap.altTxt
         }
         localStorage.setItem(id, JSON.stringify(product))
     }, false )
