@@ -103,7 +103,7 @@ function createInput(item) {
 /**
  * Create the quantity div, and append it the Qte HTMLParagraphElement and
  * the input HTMLInputElement
- * @param {*} item 
+ * @param {array} item 
  * @returns HTMLElement
  */
 function createQuantity (item) {
@@ -113,6 +113,18 @@ function createQuantity (item) {
     const input = (createInput(item))
     quantity.appendChild(input)
     return quantity
+}
+
+/**
+ * Make an eventListener for each "supprimer" div, which delete the item 
+ * from the cart page, the cart, the localStorage
+ * @param {HTMLElement}
+ */
+ function deleteProduct(event) {
+    const article = event.target.parentNode.parentNode.parentNode.parentNode
+    const itemKey = article.getAttribute("data-id") + article.getAttribute("data-color")
+    article.remove()
+    localStorage.removeItem(itemKey)
 }
 
 /**
@@ -126,6 +138,7 @@ function createDeleteDiv() {
     const deleteItem = document.createElement("p")
     deleteItem.innerText = "Supprimer"
     deleteDiv.appendChild(deleteItem)
+    deleteItem.addEventListener("click", event => deleteProduct(event), false)
     return deleteDiv
     
 }
@@ -232,21 +245,7 @@ function updateCart(item, data) {
     })
 }
 
-/**
- * Make an eventListener for each "supprimer" div, which delete the item 
- * from the cart page, the cart, the localStorage
- */
-function deleteProduct() {
-    const buttons = document.querySelectorAll(".cart__item__content__settings__delete")
-    console.log(buttons)
-    buttons.forEach((button) => {
-        button.addEventListener("click", event => {
-            const article = event.target.parentNode.parentNode.parentNode.parentNode
-            article.remove()
-            localStorage.removeItem(article.getAttribute("data-id"))
-        } , false )
-    })
-}
+
 
 const cart = getItems()
 fetch(`http://localhost:3000/api/products/`)
@@ -260,4 +259,4 @@ fetch(`http://localhost:3000/api/products/`)
     createTotal(cart, data)
 }))
 
-deleteProduct()
+
