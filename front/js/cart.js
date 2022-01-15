@@ -9,6 +9,7 @@ function getItems () {
         const item = JSON.parse(itemJson)
         cart.push(item)
     }
+
     return cart
 }
 
@@ -120,11 +121,13 @@ function createQuantity (item) {
  * from the cart page, the cart, the localStorage
  * @param {HTMLElement}
  */
- function deleteProduct(event) {
+ function deleteProduct(event, item) {
     const article = event.target.parentNode.parentNode.parentNode.parentNode
     const itemKey = article.getAttribute("data-id") + article.getAttribute("data-color")
     article.remove()
     localStorage.removeItem(itemKey)
+    cart = getItems()
+    console.log(cart)
 }
 
 /**
@@ -132,13 +135,13 @@ function createQuantity (item) {
  * and append the latter to the former
  * @returns HTMLElement
  */
-function createDeleteDiv() {
+function createDeleteDiv(item) {
     const deleteDiv = document.createElement("div")
     deleteDiv.classList.add("cart__item__content__settings__delete")
     const deleteItem = document.createElement("p")
     deleteItem.innerText = "Supprimer"
     deleteDiv.appendChild(deleteItem)
-    deleteItem.addEventListener("click", event => deleteProduct(event), false)
+    deleteItem.addEventListener("click", event => deleteProduct(event, item), false)
     return deleteDiv
     
 }
@@ -152,7 +155,7 @@ function createItemSetting(item) {
     const setting = document.createElement("div")
     setting.classList.add("cart__item__content__settings")
     setting.appendChild(createQuantity (item))
-    setting.appendChild(createDeleteDiv())
+    setting.appendChild(createDeleteDiv(item))
     return setting
 }
 
@@ -229,7 +232,7 @@ function createTotal(cart, data) {
  * @param {array} item 
  * @param {array} data 
  */
-function updateCart(item, data) {
+function updateQuantity(item, data) {
     const inputs = document.querySelectorAll(".itemQuantity")
     inputs.forEach(input => {
         input.addEventListener("input", e => {
@@ -246,14 +249,14 @@ function updateCart(item, data) {
 
 
 
-const cart = getItems()
+let cart = getItems()
 fetch(`http://localhost:3000/api/products/`)
 .then((response) => response.json())
 .then((data => {
     cart.forEach(item => {
         const kanap = findKanap(item, data)
         createProducts(item, kanap)
-        updateCart(item, data)
+        updateQuantity(item, data)
     });
     createTotal(cart, data)
 }))
