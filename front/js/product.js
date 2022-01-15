@@ -92,7 +92,13 @@ function buttonClick (kanap) {
             color: color,
             quantity: Number(quantity),
         }
-        
-        localStorage.setItem(key, JSON.stringify(product))
+        if (localStorage.getItem(key) === null) {
+            localStorage.setItem(key, JSON.stringify(product))
+            } else {
+            let storageUpdate = localStorage.getItem(key)
+            storageUpdate = JSON.parse(storageUpdate)
+            storageUpdate.quantity += product.quantity
+            localStorage.setItem(key, JSON.stringify(storageUpdate))
+        }
     }, false )
 }

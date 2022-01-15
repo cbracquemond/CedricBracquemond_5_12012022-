@@ -235,7 +235,6 @@ function updateCart(item, data) {
         input.addEventListener("input", e => {
             const itemKey = item.id + item.color
             let storageUpdate = localStorage.getItem(itemKey)
-            console.log(storageUpdate)
             storageUpdate = JSON.parse(storageUpdate)
             storageUpdate.quantity = Number(input.value)
             localStorage.setItem(itemKey, JSON.stringify(storageUpdate))
