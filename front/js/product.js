@@ -77,28 +77,34 @@ function createColors (colors) {
 
 }
 
+function cartUpdate(key, product) {
+    if (localStorage.getItem(key) === null) {
+        localStorage.setItem(key, JSON.stringify(product))
+        } else {
+        let storageUpdate = localStorage.getItem(key)
+        storageUpdate = JSON.parse(storageUpdate)
+        storageUpdate.quantity += product.quantity
+        localStorage.setItem(key, JSON.stringify(storageUpdate))
+    }
+}
+
 /**
  * Add a click event on the button to pass the product objet in the local storage
  * @param {object} kanap 
  */
 function buttonClick (kanap) {
     const button = document.querySelector("#addToCart")
-    button.addEventListener("click", e => {
-        const color = document.querySelector("#colors").value
-        const quantity = document.querySelector("#quantity").value
-        const key = id + color
+    button.addEventListener("click", e => { 
         const product = {
             id: kanap._id,
-            color: color,
-            quantity: Number(quantity),
+            color: document.querySelector("#colors").value,
+            quantity: Number(document.querySelector("#quantity").value),
         }
-        if (localStorage.getItem(key) === null) {
-            localStorage.setItem(key, JSON.stringify(product))
-            } else {
-            let storageUpdate = localStorage.getItem(key)
-            storageUpdate = JSON.parse(storageUpdate)
-            storageUpdate.quantity += product.quantity
-            localStorage.setItem(key, JSON.stringify(storageUpdate))
+        const key = id + product.color
+        if (product.quantity != 0 && product.color != "") {
+            cartUpdate(key, product)
+        } else {
+            alert("Veuillez définir une couleur et une quantité")
         }
     }, false )
 }
