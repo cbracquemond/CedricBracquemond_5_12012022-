@@ -1,4 +1,5 @@
 let cart = getItems()
+
 fetch(`http://localhost:3000/api/products/`)
 .then((response) => response.json())
 .then((data => {
@@ -8,6 +9,8 @@ fetch(`http://localhost:3000/api/products/`)
     });
     createTotal(cart, data)
     updateQuantity(data)
+    submitOrder()
+
 }))
 
 /**
@@ -46,7 +49,7 @@ fetch(`http://localhost:3000/api/products/`)
  * search in the data the object corresponding to the item in the cart
  * @param {array} item 
  * @param {array} data 
- * @returns object
+ * @returns {object} kanap
  */
  function findKanap(item, data) {
     const kanap = data.find(element => element._id === item.id)
@@ -56,7 +59,7 @@ fetch(`http://localhost:3000/api/products/`)
 /**
  *  create the Article HTMLElement 
  * @param {array} item 
- * @returns HTMLElement
+ * @returns {HTMLElement} article
  */
 function createArticle (item) {
     const article = document.createElement("article")
@@ -69,7 +72,7 @@ function createArticle (item) {
 /**
  * Create the div containing the product image, then the image, and put the image in the div
  * @param {object} kanap 
- * @returns HTMLElement
+ * @returns {HTMLElement} slot
  */
 function createImage (kanap) {
     const slot = document.createElement("div")
@@ -84,7 +87,7 @@ function createImage (kanap) {
 
 /**
  * Create a div HTMLElement
- * @returns HTMLElement
+ * @returns {HTMLElement} content
  */
 function createItemContent () {
     const content = document.createElement("div")
@@ -97,7 +100,7 @@ function createItemContent () {
  * price and color of the item, and append them to the description
  * @param {array} item 
  * @param {object} kanap 
- * @returns HTMLElement
+ * @returns {HTMLElement} description
  */
 function createItemDescription (item, kanap) {
     const description = document.createElement("div")
@@ -117,7 +120,7 @@ function createItemDescription (item, kanap) {
 /**
  * Create the setting HTMLElement, and append to it the quantity and deleteDiv HTMLElement
  * @param {array} item 
- * @returns HTMLElement
+ * @returns {HTMLElement} setting
  */
  function createItemSetting(item) {
     const setting = document.createElement("div")
@@ -131,7 +134,7 @@ function createItemDescription (item, kanap) {
  * Create the quantity div, and append it the Qte HTMLParagraphElement and
  * the input HTMLInputElement
  * @param {array} item 
- * @returns HTMLElement
+ * @returns {HTMLElement} quantity
  */
  function createQuantity (item) {
     const quantity = document.createElement("div")
@@ -144,7 +147,7 @@ function createItemDescription (item, kanap) {
 
 /**
  * Create a HTMLParagraphElement displaying the text "Qté :"
- * @returns HTMLParagraphElement
+ * @returns {HTMLParagraphElement} qte
  */
  function createQte() {
     const qte = document.createElement("p")
@@ -155,7 +158,7 @@ function createItemDescription (item, kanap) {
 /**
  * Create the input HTMLInputElement and set its attributes
  * @param {array} item 
- * @returns HTMLInputElement
+ * @returns {HTMLInputElement} input
  */
  function createInput(item) {
     const input = document.createElement("input")
@@ -171,7 +174,7 @@ function createItemDescription (item, kanap) {
 /**
  * Create the deleteDiv HTMLElement and the deleteItem HTMLParagraphElement
  * and append the latter to the former
- * @returns HTMLElement
+ * @returns {HTMLElement} deleteDiv
  */
  function createDeleteDiv() {
     const deleteDiv = document.createElement("div")
@@ -185,7 +188,8 @@ function createItemDescription (item, kanap) {
 /**
  * Make an eventListener for each "supprimer" div, which delete the item 
  * from the cart page, the cart, the localStorage
- * @param {HTMLElement}
+ * @param {array} item
+ * @param {array} data
  */
  function deleteProduct(item, data) {
     const button = document.querySelector(`.cart__item[data-id="${item.id}"].cart__item[data-color="${item.color}"] .cart__item__content__settings__delete`)
@@ -213,7 +217,7 @@ function createItemDescription (item, kanap) {
 /**
  * Add all the quantity of all the items in the cart
  * @param {array} cart 
- * @returns Number
+ * @returns {Number} totalQty
  */
  function totalQuantity(cart) {
     let totalQty = 0
@@ -241,7 +245,6 @@ function createItemDescription (item, kanap) {
 /**
  * Make an eventListener for each input, which update the localStorage
  * and the total price and quantity with each change
- * @param {array} item 
  * @param {array} data 
  */
  function updateQuantity(data) {
@@ -261,25 +264,36 @@ function createItemDescription (item, kanap) {
     })
 }
 
+function submitOrder() {
+    const orderButton = document.querySelector("#order")
+    orderButton.addEventListener("click", event => {
+        event.preventDefault()
+        if (cart.length === 0) {
+            alert("Votre panier est vide!")
+        } else {
+            const form = document.querySelector(".cart__order__form")
+            const body = makeRequestBody()
+            fetch(`http://localhost:3000/api/order/`, {
+                method: "POST",
+                body: JSON.stringify(body)
+            }) 
+            .then((response) => response.json())
+            .then((data => console.log(data)))
+            // console.log(form.elements)
+        }
+    })
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function makeRequestBody() {
+    const body = { 
+        contact: {
+            firstName: "string" ,
+            lastName: "string" ,
+            address: "string" ,
+            city: "string" ,
+            email: "string" 
+        },
+        products: ["string"]
+    }
+    return body
+}
