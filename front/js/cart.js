@@ -1,16 +1,56 @@
+let cart = getItems()
+fetch(`http://localhost:3000/api/products/`)
+.then((response) => response.json())
+.then((data => {
+    cart.forEach(item => {
+        createProducts(item, data)
+        deleteProduct(item, data)
+    });
+    createTotal(cart, data)
+    updateQuantity(data)
+}))
+
 /**
  * Create a cart array with the localStorage data
  * @returns {array} cart
  */
-function getItems () {
+ function getItems () {
     const cart = []
     for (let i = 0; i < localStorage.length; i++) {
         const itemJson = localStorage.getItem(localStorage.key(i))
         const item = JSON.parse(itemJson)
         cart.push(item)
     }
-
     return cart
+}
+
+/**
+ * Target the cart__item section, and call all the relevant function
+ * to create and append all the necessary elements to it 
+ * @param {array} item 
+ * @param {object} kanap 
+ */
+ function createProducts (item, data) {
+    const kanap = findKanap(item, data)
+    const section = document.querySelector("#cart__items")
+    const article = createArticle (item)
+    section.appendChild(article)
+    article.appendChild(createImage (kanap))
+    const content = createItemContent()
+    article.appendChild(content)
+    content.appendChild(createItemDescription(item, kanap))
+    content.appendChild(createItemSetting(item))
+}
+
+/**
+ * search in the data the object corresponding to the item in the cart
+ * @param {array} item 
+ * @param {array} data 
+ * @returns object
+ */
+ function findKanap(item, data) {
+    const kanap = data.find(element => element._id === item.id)
+    return kanap
 }
 
 /**
@@ -75,10 +115,38 @@ function createItemDescription (item, kanap) {
 }
 
 /**
+ * Create the setting HTMLElement, and append to it the quantity and deleteDiv HTMLElement
+ * @param {array} item 
+ * @returns HTMLElement
+ */
+ function createItemSetting(item) {
+    const setting = document.createElement("div")
+    setting.classList.add("cart__item__content__settings")
+    setting.appendChild(createQuantity (item))
+    setting.appendChild(createDeleteDiv())
+    return setting
+}
+
+/**
+ * Create the quantity div, and append it the Qte HTMLParagraphElement and
+ * the input HTMLInputElement
+ * @param {array} item 
+ * @returns HTMLElement
+ */
+ function createQuantity (item) {
+    const quantity = document.createElement("div")
+    quantity.classList.add("cart__item__content__settings__quantity")
+    quantity.appendChild(createQte())
+    const input = (createInput(item))
+    quantity.appendChild(input)
+    return quantity
+}
+
+/**
  * Create a HTMLParagraphElement displaying the text "Qté :"
  * @returns HTMLParagraphElement
  */
-function createQte() {
+ function createQte() {
     const qte = document.createElement("p")
     qte.innerText = "Qté : "
     return qte
@@ -89,7 +157,7 @@ function createQte() {
  * @param {array} item 
  * @returns HTMLInputElement
  */
-function createInput(item) {
+ function createInput(item) {
     const input = document.createElement("input")
     input.type = "number"
     input.classList.add("itemQuantity")
@@ -100,20 +168,18 @@ function createInput(item) {
     return input
 }
 
-
 /**
- * Create the quantity div, and append it the Qte HTMLParagraphElement and
- * the input HTMLInputElement
- * @param {array} item 
+ * Create the deleteDiv HTMLElement and the deleteItem HTMLParagraphElement
+ * and append the latter to the former
  * @returns HTMLElement
  */
-function createQuantity (item) {
-    const quantity = document.createElement("div")
-    quantity.classList.add("cart__item__content__settings__quantity")
-    quantity.appendChild(createQte())
-    const input = (createInput(item))
-    quantity.appendChild(input)
-    return quantity
+ function createDeleteDiv() {
+    const deleteDiv = document.createElement("div")
+    deleteDiv.classList.add("cart__item__content__settings__delete")
+    const deleteItem = document.createElement("p")
+    deleteItem.innerText = "Supprimer"
+    deleteDiv.appendChild(deleteItem)
+    return deleteDiv 
 }
 
 /**
@@ -121,59 +187,27 @@ function createQuantity (item) {
  * from the cart page, the cart, the localStorage
  * @param {HTMLElement}
  */
- function deleteProduct(event, item) {
-    const article = event.target.parentNode.parentNode.parentNode.parentNode
-    const itemKey = article.getAttribute("data-id") + article.getAttribute("data-color")
-    article.remove()
-    localStorage.removeItem(itemKey)
-    cart = getItems()
-    console.log(cart)
+ function deleteProduct(item, data) {
+    const button = document.querySelector(`.cart__item[data-id="${item.id}"].cart__item[data-color="${item.color}"] .cart__item__content__settings__delete`)
+    button.addEventListener("click", event => {
+        const article = event.target.closest(".cart__item")
+        const itemKey = article.getAttribute("data-id") + article.getAttribute("data-color")
+        article.remove()
+        localStorage.removeItem(itemKey)
+        cart = getItems()
+        createTotal(cart, data)
+    })
 }
 
 /**
- * Create the deleteDiv HTMLElement and the deleteItem HTMLParagraphElement
- * and append the latter to the former
- * @returns HTMLElement
+ * Takes the totalQuantity and priceTotal and put them in their
+ * HTMLElement as innerText
+ * @param {array} cart 
+ * @param {array} data 
  */
-function createDeleteDiv(item) {
-    const deleteDiv = document.createElement("div")
-    deleteDiv.classList.add("cart__item__content__settings__delete")
-    const deleteItem = document.createElement("p")
-    deleteItem.innerText = "Supprimer"
-    deleteDiv.appendChild(deleteItem)
-    deleteItem.addEventListener("click", event => deleteProduct(event, item), false)
-    return deleteDiv
-    
-}
-
-/**
- * Create the setting HTMLElement, and append to it the quantity and deleteDiv HTMLElement
- * @param {array} item 
- * @returns HTMLElement
- */
-function createItemSetting(item) {
-    const setting = document.createElement("div")
-    setting.classList.add("cart__item__content__settings")
-    setting.appendChild(createQuantity (item))
-    setting.appendChild(createDeleteDiv(item))
-    return setting
-}
-
-/**
- * Target the cart__item section, and call all the relevant function
- * to create and append all the necessary elements to it 
- * @param {array} item 
- * @param {object} kanap 
- */
-function createProducts (item, kanap) {
-    const section = document.querySelector("#cart__items")
-    const article = createArticle (item)
-    section.appendChild(article)
-    article.appendChild(createImage (kanap))
-    const content = createItemContent()
-    article.appendChild(content)
-    content.appendChild(createItemDescription(item, kanap))
-    content.appendChild(createItemSetting(item))
+ function createTotal(cart, data) {
+    document.querySelector("#totalQuantity").innerText = totalQuantity(cart)
+    document.querySelector("#totalPrice").innerText = totalPrice(cart, data)
 }
 
 /**
@@ -181,7 +215,7 @@ function createProducts (item, kanap) {
  * @param {array} cart 
  * @returns Number
  */
-function totalQuantity(cart) {
+ function totalQuantity(cart) {
     let totalQty = 0
     cart.forEach((item) => {
         totalQty += item.quantity 
@@ -190,23 +224,12 @@ function totalQuantity(cart) {
 }
 
 /**
- * search in the data the object corresponding to the item in the cart
- * @param {array} item 
- * @param {array} data 
- * @returns object
- */
-function findKanap(item, data) {
-    const kanap = data.find(element => element._id === item.id)
-    return kanap
-}
-
-/**
  * Make the price total of all the items in the cart
  * @param {array} cart 
  * @param {array} data 
  * @returns Number
  */
-function totalPrice(cart, data) {
+ function totalPrice(cart, data) {
     let priceTotal = 0
     cart.forEach(item => {
         const kanap = findKanap(item, data)
@@ -216,31 +239,22 @@ function totalPrice(cart, data) {
 }
 
 /**
- * Takes the totalQuantity and priceTotal and put them in their
- * HTMLElement as innerText
- * @param {array} cart 
- * @param {array} data 
- */
-function createTotal(cart, data) {
-    document.querySelector("#totalQuantity").innerText = totalQuantity(cart)
-    document.querySelector("#totalPrice").innerText = totalPrice(cart, data)
-}
-
-/**
  * Make an eventListener for each input, which update the localStorage
  * and the total price and quantity with each change
  * @param {array} item 
  * @param {array} data 
  */
-function updateQuantity(item, data) {
+ function updateQuantity(data) {
     const inputs = document.querySelectorAll(".itemQuantity")
     inputs.forEach(input => {
-        input.addEventListener("input", e => {
-            const itemKey = item.id + item.color
+        input.addEventListener("input", event => {
+            const article = event.target.closest(".cart__item")
+            const itemKey = article.getAttribute("data-id") + article.getAttribute("data-color")
             let storageUpdate = localStorage.getItem(itemKey)
             storageUpdate = JSON.parse(storageUpdate)
             storageUpdate.quantity = Number(input.value)
             localStorage.setItem(itemKey, JSON.stringify(storageUpdate))
+            const item = cart.find(element => element.id === article.getAttribute("data-id") )
             item.quantity = Number(input.value)
             createTotal(cart, data)
         });
@@ -249,16 +263,23 @@ function updateQuantity(item, data) {
 
 
 
-let cart = getItems()
-fetch(`http://localhost:3000/api/products/`)
-.then((response) => response.json())
-.then((data => {
-    cart.forEach(item => {
-        const kanap = findKanap(item, data)
-        createProducts(item, kanap)
-        updateQuantity(item, data)
-    });
-    createTotal(cart, data)
-}))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
