@@ -7,7 +7,7 @@ fetch(`http://localhost:3000/api/products/`)
         createProducts(item, data)
         deleteProduct(item, data)
     });
-    createTotal(cart, data)
+    createTotal(data)
     updateQuantity(data)
     submitOrder()
 
@@ -199,52 +199,30 @@ function createItemDescription (item, kanap) {
         article.remove()
         localStorage.removeItem(itemKey)
         cart = getItems()
-        createTotal(cart, data)
+        createTotal(data)
     })
 }
 
 /**
- * Takes the totalQuantity and priceTotal and put them in their
- * HTMLElement as innerText
- * @param {array} cart 
+ * Loop through the cart to create the totalQuantity and totalPrice and put them in their
+ * HTMLElement as innerText 
  * @param {array} data 
  */
- function createTotal(cart, data) {
-    document.querySelector("#totalQuantity").innerText = totalQuantity(cart)
-    document.querySelector("#totalPrice").innerText = totalPrice(cart, data)
-}
-
-/**
- * Add all the quantity of all the items in the cart
- * @param {array} cart 
- * @returns {Number} totalQty
- */
- function totalQuantity(cart) {
-    let totalQty = 0
-    cart.forEach((item) => {
-        totalQty += item.quantity 
-    })
-    return totalQty
-}
-
-/**
- * Make the price total of all the items in the cart
- * @param {array} cart 
- * @param {array} data 
- * @returns Number
- */
- function totalPrice(cart, data) {
-    let priceTotal = 0
+ function createTotal(data) {
+    let totalQuantity = 0
+    let totalPrice = 0
     cart.forEach(item => {
+        totalQuantity += item.quantity
         const kanap = findKanap(item, data)
-        priceTotal += item.quantity * kanap.price
+        totalPrice += item.quantity * kanap.price
     });
-    return priceTotal
+    document.querySelector("#totalQuantity").innerText = totalQuantity
+    document.querySelector("#totalPrice").innerText = totalPrice
 }
 
 /**
  * Make an eventListener for each input, which update the localStorage
- * and the total price and quantity with each change
+ * the cart and totals with each change
  * @param {array} data 
  */
  function updateQuantity(data) {
@@ -257,9 +235,8 @@ function createItemDescription (item, kanap) {
             storageUpdate = JSON.parse(storageUpdate)
             storageUpdate.quantity = Number(input.value)
             localStorage.setItem(itemKey, JSON.stringify(storageUpdate))
-            const item = cart.find(element => element.id === article.getAttribute("data-id") )
-            item.quantity = Number(input.value)
-            createTotal(cart, data)
+            cart = getItems()
+            createTotal(data)
         });
     })
 }
@@ -273,6 +250,7 @@ function submitOrder() {
         } else {
             const form = document.querySelector(".cart__order__form")
             const body = makeRequestBody(form)
+            console.log(body)
             fetch(`http://localhost:3000/api/products/order/`, {
                 method: "POST",
                 body: JSON.stringify(body),
@@ -288,6 +266,7 @@ function submitOrder() {
 }
 
 function makeRequestBody(form) {
+    const products = createProductsArray()
     const body = { 
         contact: {
             firstName: `${form.elements.firstName.value}` ,
@@ -296,7 +275,15 @@ function makeRequestBody(form) {
             city: `${form.elements.city.value}` ,
             email: `${form.elements.email.value}` ,
         },
-        products: ["107fb5b75607497b96722bda5b504926"]
+        products: products
     }
     return body
+}
+
+function createProductsArray() {
+    products = []
+    cart.forEach(item => {
+        products.push(item.id)
+    });
+    return products
 }
