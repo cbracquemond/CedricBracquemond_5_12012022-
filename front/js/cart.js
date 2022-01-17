@@ -272,28 +272,31 @@ function submitOrder() {
             alert("Votre panier est vide!")
         } else {
             const form = document.querySelector(".cart__order__form")
-            const body = makeRequestBody()
-            fetch(`http://localhost:3000/api/order/`, {
+            const body = makeRequestBody(form)
+            fetch(`http://localhost:3000/api/products/order/`, {
                 method: "POST",
-                body: JSON.stringify(body)
+                body: JSON.stringify(body),
+                headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                }
             }) 
             .then((response) => response.json())
             .then((data => console.log(data)))
-            // console.log(form.elements)
         }
     })
 }
 
-function makeRequestBody() {
+function makeRequestBody(form) {
     const body = { 
         contact: {
-            firstName: "string" ,
-            lastName: "string" ,
-            address: "string" ,
-            city: "string" ,
-            email: "string" 
+            firstName: `${form.elements.firstName.value}` ,
+            lastName: `${form.elements.lastName.value}` ,
+            address: `${form.elements.address.value}` ,
+            city: `${form.elements.city.value}` ,
+            email: `${form.elements.email.value}` ,
         },
-        products: ["string"]
+        products: ["107fb5b75607497b96722bda5b504926"]
     }
     return body
 }
