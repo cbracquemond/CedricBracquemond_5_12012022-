@@ -1,7 +1,3 @@
-fetch("http://localhost:3000/api/products")
-.then((response) => response.json())
-.then((data) => createProducts(data))
-
 /**
  * Create all the products cards with functioning anchors
  * @param {object} kanaps 
@@ -83,6 +79,10 @@ function makeParagraph(description) {
     return p
 }
 
+function init() {
+    fetch("http://localhost:3000/api/products")
+    .then((response) => response.json())
+    .then((data) => createProducts(data))
+}
 
-
-
+init()

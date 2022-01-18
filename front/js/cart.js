@@ -241,6 +241,49 @@ function createItemDescription (item, kanap) {
     })
 }
 
+function checkCompletion(form) {
+    const inputs = form.querySelectorAll("input")
+    for (let index = 0; index < inputs.length; index++) {
+        const input = inputs[index]
+        if (input.value === "") {
+            alert("Veuillez remplir tout les champs!")
+            return false
+        }
+    }
+    return true
+}
+
+function checkValues(form) {
+    const regexList = new Map()
+    regexList.set("firstName", /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/)
+    regexList.set("lastName", /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/)
+    regexList.set("address", /^.*$/)
+    regexList.set("city", /^([a-zA-Z\u0080-\u024F]+(?:. |-| |'))*[a-zA-Z\u0080-\u024F]*$/)
+    regexList.set("email", /^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+    
+    inputs = form.querySelectorAll(".cart__order__form__question input")
+    isChecked = []
+    for (let index = 0; index < inputs.length; index++) {
+        const input = inputs[index];   
+        const errorMsg = document.querySelector(`#${input.id}ErrorMsg`)
+        const label = input.closest(".cart__order__form__question").querySelector("label").innerText
+        const newLabel = label.replace(":", "")
+        const regex = regexList.get(`${input.id}`)
+        if (!regex.test(input.value)) {
+            errorMsg.innerText = `Votre ${newLabel} est invalide!`
+            isChecked.push(false)
+        } 
+    }
+    if (isChecked.length != 0)  return false
+    return true
+}
+
+
+function checkForm(form) {
+    if (!checkCompletion(form) || !checkValues(form)) return false
+    return true
+}
+
 function submitOrder() {
     const orderButton = document.querySelector("#order")
     orderButton.addEventListener("click", event => {
@@ -249,6 +292,8 @@ function submitOrder() {
             alert("Votre panier est vide!")
         } else {
             const form = document.querySelector(".cart__order__form")
+            //Prevent the sending of the form if not valid
+            if (!checkForm(form)) return
             const body = makeRequestBody(form)
             console.log(body)
             fetch(`http://localhost:3000/api/products/order/`, {
