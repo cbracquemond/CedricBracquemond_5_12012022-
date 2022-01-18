@@ -1,18 +1,5 @@
 let cart = getItems()
 
-fetch(`http://localhost:3000/api/products/`)
-.then((response) => response.json())
-.then((data => {
-    cart.forEach(item => {
-        createProducts(item, data)
-        deleteProduct(item, data)
-    });
-    createTotal(data)
-    updateQuantity(data)
-    submitOrder()
-
-}))
-
 /**
  * Create a cart array with the localStorage data
  * @returns {array} cart
@@ -295,7 +282,6 @@ function submitOrder() {
             //Prevent the sending of the form if not valid
             if (!checkForm(form)) return
             const body = makeRequestBody(form)
-            console.log(body)
             fetch(`http://localhost:3000/api/products/order/`, {
                 method: "POST",
                 body: JSON.stringify(body),
@@ -305,7 +291,9 @@ function submitOrder() {
                 }
             }) 
             .then((response) => response.json())
-            .then((data => console.log(data)))
+            .then((data => {
+                location.href = `./confirmation.html?orderId=${data.orderId}`
+            }))
         }
     })
 }
@@ -332,3 +320,28 @@ function createProductsArray() {
     });
     return products
 }
+
+function initCart() {
+    fetch(`http://localhost:3000/api/products/`)
+    .then((response) => response.json())
+    .then((data => {
+        cart.forEach(item => {
+            createProducts(item, data)
+            deleteProduct(item, data)
+        });
+        createTotal(data)
+        updateQuantity(data)
+        submitOrder()
+    }))
+}
+
+function initConfirmation() {
+    const url = new URL( window.location.href)
+    const id = url.searchParams.get("orderId")
+    const orderId = document.querySelector("#orderId")
+    orderId.innerText = id
+}
+
+if (/cart/.test(location.href)) initCart()
+
+if (/confirmation/.test(location.href)) initConfirmation()
