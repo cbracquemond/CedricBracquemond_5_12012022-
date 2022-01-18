@@ -1,19 +1,4 @@
-/**
- * Create all the products cards with functioning anchors
- * @param {object} kanaps 
- */
-function createProducts(kanaps) {
-    kanaps.forEach((kanap) => {
-        
-        const {_id, name, imageUrl, altTxt, description } = kanap
-        const anchor = makeAnchor(_id)
-        const article = makeArticle(anchor)
-        article.appendChild(makeTitle(name))
-        article.appendChild(makeImage(imageUrl, altTxt))
-        article.appendChild(makeParagraph(description))
-       
-    });
-}
+
 
 /**
  * Create a HTMLAnchorElement and append it to the items HTMLElement
@@ -79,6 +64,27 @@ function makeParagraph(description) {
     return p
 }
 
+/**
+ * Create all the products cards with functioning anchors
+ * @param {object} kanaps 
+ */
+ function createProducts(kanaps) {
+    kanaps.forEach((kanap) => {
+        
+        const {_id, name, imageUrl, altTxt, description } = kanap
+        const anchor = makeAnchor(_id)
+        const article = makeArticle(anchor)
+        article.appendChild(makeTitle(name))
+        article.appendChild(makeImage(imageUrl, altTxt))
+        article.appendChild(makeParagraph(description))
+       
+    });
+}
+
+/**
+ * Begin the execution of the page script, by making a request to the API to get the 
+ * products data, then executing the createProduct.
+ */
 function init() {
     fetch("http://localhost:3000/api/products")
     .then((response) => response.json())

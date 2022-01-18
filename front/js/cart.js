@@ -15,24 +15,6 @@ let cart = getItems()
 }
 
 /**
- * Target the cart__item section, and call all the relevant function
- * to create and append all the necessary elements to it 
- * @param {array} item 
- * @param {object} kanap 
- */
- function createProducts (item, data) {
-    const kanap = findKanap(item, data)
-    const section = document.querySelector("#cart__items")
-    const article = createArticle (item)
-    section.appendChild(article)
-    article.appendChild(createImage (kanap))
-    const content = createItemContent()
-    article.appendChild(content)
-    content.appendChild(createItemDescription(item, kanap))
-    content.appendChild(createItemSetting(item))
-}
-
-/**
  * search in the data the object corresponding to the item in the cart
  * @param {array} item 
  * @param {array} data 
@@ -105,16 +87,29 @@ function createItemDescription (item, kanap) {
 }
 
 /**
- * Create the setting HTMLElement, and append to it the quantity and deleteDiv HTMLElement
- * @param {array} item 
- * @returns {HTMLElement} setting
+ * Create a HTMLParagraphElement displaying the text "Qté :"
+ * @returns {HTMLParagraphElement} qte
  */
- function createItemSetting(item) {
-    const setting = document.createElement("div")
-    setting.classList.add("cart__item__content__settings")
-    setting.appendChild(createQuantity (item))
-    setting.appendChild(createDeleteDiv())
-    return setting
+function createQte() {
+    const qte = document.createElement("p")
+    qte.innerText = "Qté : "
+    return qte
+}
+
+/**
+ * Create the input HTMLInputElement and set its attributes
+ * @param {array} item 
+ * @returns {HTMLInputElement} input
+ */
+function createInput(item) {
+    const input = document.createElement("input")
+    input.type = "number"
+    input.classList.add("itemQuantity")
+    input.name = "itemQuantity"
+    input.min = 1
+    input.max = 100
+    input.value = item.quantity
+    return input
 }
 
 /**
@@ -133,43 +128,172 @@ function createItemDescription (item, kanap) {
 }
 
 /**
- * Create a HTMLParagraphElement displaying the text "Qté :"
- * @returns {HTMLParagraphElement} qte
- */
- function createQte() {
-    const qte = document.createElement("p")
-    qte.innerText = "Qté : "
-    return qte
-}
-
-/**
- * Create the input HTMLInputElement and set its attributes
- * @param {array} item 
- * @returns {HTMLInputElement} input
- */
- function createInput(item) {
-    const input = document.createElement("input")
-    input.type = "number"
-    input.classList.add("itemQuantity")
-    input.name = "itemQuantity"
-    input.min = 1
-    input.max = 100
-    input.value = item.quantity
-    return input
-}
-
-/**
  * Create the deleteDiv HTMLElement and the deleteItem HTMLParagraphElement
  * and append the latter to the former
  * @returns {HTMLElement} deleteDiv
  */
- function createDeleteDiv() {
+function createDeleteDiv() {
     const deleteDiv = document.createElement("div")
     deleteDiv.classList.add("cart__item__content__settings__delete")
     const deleteItem = document.createElement("p")
     deleteItem.innerText = "Supprimer"
     deleteDiv.appendChild(deleteItem)
     return deleteDiv 
+}
+
+/**
+ * Loop through the cart to create the totalQuantity and totalPrice and put them in their
+ * HTMLElement as innerText 
+ * @param {array} data 
+ */
+ function createTotal(data) {
+    let totalQuantity = 0
+    let totalPrice = 0
+    cart.forEach(item => {
+        totalQuantity += item.quantity
+        const kanap = findKanap(item, data)
+        totalPrice += item.quantity * kanap.price
+    });
+    document.querySelector("#totalQuantity").innerText = totalQuantity
+    document.querySelector("#totalPrice").innerText = totalPrice
+}
+
+/**
+ * Create the setting HTMLElement, and append to it the quantity and deleteDiv HTMLElement
+ * @param {array} item 
+ * @returns {HTMLElement} setting
+ */
+ function createItemSetting(item) {
+    const setting = document.createElement("div")
+    setting.classList.add("cart__item__content__settings")
+    setting.appendChild(createQuantity (item))
+    setting.appendChild(createDeleteDiv())
+    return setting
+}
+
+
+/**
+ * Check if the cart is empty, then return a boolean to allow or block the execution of the 
+ * submitOrder function
+ * @returns {boolean}
+ */
+function checkCart() {
+    if (cart.length === 0) {
+        alert("Votre panier est vide!")
+        return true
+    }
+}
+
+/**
+ * Check if all the form input are filled, then return a false to checkForm if not
+ * @param {HTMLFormElement} form 
+ * @returns {boolean}
+ */
+function checkCompletion(form) {
+    const inputs = form.querySelectorAll("input")
+    for (let index = 0; index < inputs.length; index++) {
+        const input = inputs[index]
+        if (input.value === "") {
+            alert("Veuillez remplir tout les champs!")
+            return false
+        }
+    }
+    return true
+}
+
+/**
+ * Loop through all the form inputs, to check if they are correct by testing them
+ * against a regex and displaying an error message if not valid. If either of the 
+ * inputs is not valid, return a false to checkForm
+ * @param {HTMLFormElement} form 
+ * @returns {boolean}
+ */
+function checkValues(form) {
+    const regexList = new Map()
+    regexList.set("firstName", /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%^&*(){}|~<>;:[\]]{2,}$/)
+    regexList.set("lastName", /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%^&*(){}|~<>;:[\]]{2,}$/)
+    regexList.set("address", /^.*$/)
+    regexList.set("city", /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%^&*(){}|~<>;:[\]]{2,}$/)
+    regexList.set("email", /^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+    inputs = form.querySelectorAll(".cart__order__form__question input")
+    isChecked = []
+    for (let index = 0; index < inputs.length; index++) {
+        const input = inputs[index];   
+        const errorMsg = document.querySelector(`#${input.id}ErrorMsg`)
+        const label = input.closest(".cart__order__form__question").querySelector("label").innerText
+        const newLabel = label.replace(":", "")
+        const regex = regexList.get(`${input.id}`)
+        if (!regex.test(input.value)) {
+            errorMsg.innerText = `Votre ${newLabel} est invalide!`
+            isChecked.push(false)
+        } 
+    }
+    if (isChecked.length != 0)  return false
+    return true
+}
+
+/**
+ * Loop through the cart to create an array of each product ID
+ * @returns {array} products
+ */
+function createProductsArray() {
+    products = []
+    cart.forEach(item => {
+        products.push(item.id)
+    });
+    return products
+}
+
+
+/**
+ * Execute both checkCompletion and checkValues, then test if either of them if
+ * true, then return a boolean to allow or block the execution of the 
+ * submitOrder function
+ * @param {HTMLFormElement} form 
+ * @returns boolean
+ */
+function checkForm(form) {
+    if (!checkCompletion(form) || !checkValues(form)) return false
+    return true
+}
+
+/**
+ * Create the body of the POST request for submitOrder by taking the
+ * value of each element of the form to put them in thecontact object, 
+ * the result of createProductArray to create the products array
+ * @param {HTMLFormElement} form 
+ * @returns {object} body
+ */
+function makeRequestBody(form) {
+    const body = { 
+        contact: {
+            firstName: `${form.elements.firstName.value}` ,
+            lastName: `${form.elements.lastName.value}` ,
+            address: `${form.elements.address.value}` ,
+            city: `${form.elements.city.value}` ,
+            email: `${form.elements.email.value}` ,
+        },
+        products: createProductsArray()
+    }
+    return body
+}
+
+/**
+ * Target the cart__item section, and call all the relevant function
+ * to create and append all the necessary elements to it 
+ * @param {array} item 
+ * @param {object} kanap 
+ */
+ function createProducts (item, data) {
+    const kanap = findKanap(item, data)
+    const section = document.querySelector("#cart__items")
+    const article = createArticle (item)
+    section.appendChild(article)
+    article.appendChild(createImage (kanap))
+    const content = createItemContent()
+    article.appendChild(content)
+    content.appendChild(createItemDescription(item, kanap))
+    content.appendChild(createItemSetting(item))
 }
 
 /**
@@ -188,23 +312,6 @@ function createItemDescription (item, kanap) {
         cart = getItems()
         createTotal(data)
     })
-}
-
-/**
- * Loop through the cart to create the totalQuantity and totalPrice and put them in their
- * HTMLElement as innerText 
- * @param {array} data 
- */
- function createTotal(data) {
-    let totalQuantity = 0
-    let totalPrice = 0
-    cart.forEach(item => {
-        totalQuantity += item.quantity
-        const kanap = findKanap(item, data)
-        totalPrice += item.quantity * kanap.price
-    });
-    document.querySelector("#totalQuantity").innerText = totalQuantity
-    document.querySelector("#totalPrice").innerText = totalPrice
 }
 
 /**
@@ -228,99 +335,40 @@ function createItemDescription (item, kanap) {
     })
 }
 
-function checkCompletion(form) {
-    const inputs = form.querySelectorAll("input")
-    for (let index = 0; index < inputs.length; index++) {
-        const input = inputs[index]
-        if (input.value === "") {
-            alert("Veuillez remplir tout les champs!")
-            return false
-        }
-    }
-    return true
-}
-
-function checkValues(form) {
-    const regexList = new Map()
-    regexList.set("firstName", /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/)
-    regexList.set("lastName", /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/)
-    regexList.set("address", /^.*$/)
-    regexList.set("city", /^([a-zA-Z\u0080-\u024F]+(?:. |-| |'))*[a-zA-Z\u0080-\u024F]*$/)
-    regexList.set("email", /^[^\s@]+@[^\s@]+\.[^\s@]+$/)
-    
-    inputs = form.querySelectorAll(".cart__order__form__question input")
-    isChecked = []
-    for (let index = 0; index < inputs.length; index++) {
-        const input = inputs[index];   
-        const errorMsg = document.querySelector(`#${input.id}ErrorMsg`)
-        const label = input.closest(".cart__order__form__question").querySelector("label").innerText
-        const newLabel = label.replace(":", "")
-        const regex = regexList.get(`${input.id}`)
-        if (!regex.test(input.value)) {
-            errorMsg.innerText = `Votre ${newLabel} est invalide!`
-            isChecked.push(false)
-        } 
-    }
-    if (isChecked.length != 0)  return false
-    return true
-}
-
-
-function checkForm(form) {
-    if (!checkCompletion(form) || !checkValues(form)) return false
-    return true
-}
-
+/**
+ * Create an event on the submit button, which check if the cart isn't empty, then 
+ * if the form is filled correctly. If both are validated, execute makeRequestBody
+ * then make a POST request with the order to get the orderId. Then redirect to the 
+ * confirmation page with the orderId in the URL
+ */
 function submitOrder() {
     const orderButton = document.querySelector("#order")
     orderButton.addEventListener("click", event => {
         event.preventDefault()
-        if (cart.length === 0) {
-            alert("Votre panier est vide!")
-        } else {
-            const form = document.querySelector(".cart__order__form")
-            //Prevent the sending of the form if not valid
-            if (!checkForm(form)) return
-            const body = makeRequestBody(form)
-            fetch(`http://localhost:3000/api/products/order/`, {
-                method: "POST",
-                body: JSON.stringify(body),
-                headers: {
-                    "Accept": "application/json",
-                    "Content-Type": "application/json"
-                }
-            }) 
-            .then((response) => response.json())
-            .then((data => {
-                location.href = `./confirmation.html?orderId=${data.orderId}`
-            }))
-        }
+        if (checkCart()) return
+        const form = document.querySelector(".cart__order__form")
+        //Prevent the sending of the form if not valid
+        if (!checkForm(form)) return
+        const body = makeRequestBody(form)
+        fetch(`http://localhost:3000/api/products/order/`, {
+            method: "POST",
+            body: JSON.stringify(body),
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            }
+        }) 
+        .then((response) => response.json())
+        .then((data => {
+            location.href = `./confirmation.html?orderId=${data.orderId}`
+        }))
     })
 }
 
-function makeRequestBody(form) {
-    const products = createProductsArray()
-    const body = { 
-        contact: {
-            firstName: `${form.elements.firstName.value}` ,
-            lastName: `${form.elements.lastName.value}` ,
-            address: `${form.elements.address.value}` ,
-            city: `${form.elements.city.value}` ,
-            email: `${form.elements.email.value}` ,
-        },
-        products: products
-    }
-    return body
-}
-
-function createProductsArray() {
-    products = []
-    cart.forEach(item => {
-        products.push(item.id)
-    });
-    return products
-}
-
+/**
+ * if the user is on the cart page, get the data in the API to execute all the 
+ * relevant function
+ */
 function initCart() {
     fetch(`http://localhost:3000/api/products/`)
     .then((response) => response.json())
@@ -335,6 +383,10 @@ function initCart() {
     }))
 }
 
+/**
+ * If the user is on the confirmation page, display the order id by
+ * getting it in the url
+ */
 function initConfirmation() {
     const url = new URL( window.location.href)
     const id = url.searchParams.get("orderId")

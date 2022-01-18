@@ -1,26 +1,5 @@
-//Get the id from the url to pass in the fetch API
 const url = new URL( window.location.href)
 const id = url.searchParams.get("id")
-
-fetch(`http://localhost:3000/api/products/${id}`)
-    .then((response) => response.json())
-    .then((data => {
-    constructPage(data)
-    buttonClick(data)
-    }))
-
-/**
- * Display the correct product information 
- * @param {object} kanap 
- */
-function constructPage(kanap) {
-    const {imageUrl, altTxt, name, price, description, colors} = kanap
-    createImage(imageUrl, altTxt)
-    setTitle(name)
-    setPrice(price)
-    setDescription (description)
-    createColors (colors)
-}
 
 /**
  * Create the product image and append it to the item__img HTMLElement
@@ -77,6 +56,12 @@ function createColors (colors) {
 
 }
 
+/**
+ * Check if the chosen product is already in the cart with the choosen color,
+ * then update the quantity if so, or create it if not
+ * @param {string} key 
+ * @param {object} product 
+ */
 function cartUpdate(key, product) {
     if (localStorage.getItem(key) === null) {
         localStorage.setItem(key, JSON.stringify(product))
@@ -86,6 +71,19 @@ function cartUpdate(key, product) {
         storageUpdate.quantity += product.quantity
         localStorage.setItem(key, JSON.stringify(storageUpdate))
     }
+}
+
+/**
+ * Display the correct product information 
+ * @param {object} kanap 
+ */
+ function constructPage(kanap) {
+    const {imageUrl, altTxt, name, price, description, colors} = kanap
+    createImage(imageUrl, altTxt)
+    setTitle(name)
+    setPrice(price)
+    setDescription (description)
+    createColors (colors)
 }
 
 /**
@@ -108,3 +106,18 @@ function buttonClick (kanap) {
         }
     }, false )
 }
+
+/**
+ * Begin the execution of the page script, by making a request to the API to get the 
+ * clicked product data, then executing constructPage and buttonClick
+ */
+function init() {   
+    fetch(`http://localhost:3000/api/products/${id}`)
+    .then((response) => response.json())
+    .then((data => {
+        constructPage(data)
+        buttonClick(data)
+    }))
+}
+
+init()
