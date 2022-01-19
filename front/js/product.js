@@ -101,11 +101,20 @@ function buttonClick (kanap) {
             quantity: Number(document.querySelector("#quantity").value),
             key: id + document.querySelector("#colors").value
         }
-        if (product.quantity === 0 || product.color === "") {
+        if (product.quantity === 0 && product.color === "") {
             alert("Veuillez définir une couleur et une quantité")
             return
         }
+        if (product.color === "") {
+            alert("Veuillez choisir une couleur")
+            return
+        }
+        if (product.quantity < 1) {
+            alert("Veuillez définir une quantité valide")
+            return
+        }
         cartUpdate(product)
+        alert("le produit a bien été rajouté à votre panier")
     }, false )
 }
 

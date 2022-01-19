@@ -10,11 +10,6 @@ let cart = getItems()
     cartStorage.forEach(item => {
         cart.push(item)
     })
-    // for (let i = 0; i < localStorage.length; i++) {
-    //     const itemJson = localStorage.getItem(localStorage.key(i))
-    //     const item = JSON.parse(itemJson)
-    //     cart.push(item)
-    // }
     return cart
 }
 
@@ -230,7 +225,8 @@ function checkValues(form) {
         if (!regex.test(input.value)) {
             errorMsg.innerText = `Votre ${newLabel} est invalide!`
             isChecked.push(false)
-        } 
+        }
+        if (regex.test(input.value)) errorMsg.innerText = ""
     }
     if (isChecked.length != 0)  return false
     return true
@@ -368,6 +364,7 @@ function submitOrder() {
         .then((response) => response.json())
         .then((data => {
             location.href = `./confirmation.html?orderId=${data.orderId}`
+
         }))
         .catch((reject) => console.log(reject))
     })
@@ -401,6 +398,7 @@ function initConfirmation() {
     const id = url.searchParams.get("orderId")
     const orderId = document.querySelector("#orderId")
     orderId.innerText = id
+    localStorage.removeItem("cart")
 }
 
 if (/cart/.test(location.href)) initCart()
