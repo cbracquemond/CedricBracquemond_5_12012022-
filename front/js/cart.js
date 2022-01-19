@@ -362,6 +362,7 @@ function submitOrder() {
         .then((data => {
             location.href = `./confirmation.html?orderId=${data.orderId}`
         }))
+        .catch((reject) => console.log(reject))
     })
 }
 
@@ -381,6 +382,7 @@ function initCart() {
         updateQuantity(data)
         submitOrder()
     }))
+    .catch((reject) => console.log(reject))
 }
 
 /**

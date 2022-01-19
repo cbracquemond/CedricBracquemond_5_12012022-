@@ -53,7 +53,6 @@ function createColors (colors) {
         option.innerText = color
         menu.appendChild(option)
     });
-
 }
 
 /**
@@ -62,7 +61,7 @@ function createColors (colors) {
  * @param {string} key 
  * @param {object} product 
  */
-function cartUpdate(key, product) {
+ function cartUpdate(key, product) {
     if (localStorage.getItem(key) === null) {
         localStorage.setItem(key, JSON.stringify(product))
         } else {
@@ -118,6 +117,7 @@ function init() {
         constructPage(data)
         buttonClick(data)
     }))
+    .catch((reject) => console.log(reject))
 }
 
 init()
