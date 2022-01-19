@@ -6,11 +6,15 @@ let cart = getItems()
  */
  function getItems () {
     const cart = []
-    for (let i = 0; i < localStorage.length; i++) {
-        const itemJson = localStorage.getItem(localStorage.key(i))
-        const item = JSON.parse(itemJson)
+    let cartStorage = JSON.parse(localStorage.getItem("cart"))
+    cartStorage.forEach(item => {
         cart.push(item)
-    }
+    })
+    // for (let i = 0; i < localStorage.length; i++) {
+    //     const itemJson = localStorage.getItem(localStorage.key(i))
+    //     const item = JSON.parse(itemJson)
+    //     cart.push(item)
+    // }
     return cart
 }
 
@@ -308,7 +312,10 @@ function makeRequestBody(form) {
         const article = event.target.closest(".cart__item")
         const itemKey = article.getAttribute("data-id") + article.getAttribute("data-color")
         article.remove()
-        localStorage.removeItem(itemKey)
+        let cartStorage = JSON.parse(localStorage.getItem("cart"))
+        const itemIndex = cartStorage.findIndex(element => element.key === itemKey)
+        cartStorage.splice(itemIndex, 1)
+        localStorage.setItem("cart", JSON.stringify(cartStorage))
         cart = getItems()
         createTotal(data)
     })
@@ -325,10 +332,10 @@ function makeRequestBody(form) {
         input.addEventListener("input", event => {
             const article = event.target.closest(".cart__item")
             const itemKey = article.getAttribute("data-id") + article.getAttribute("data-color")
-            let storageUpdate = localStorage.getItem(itemKey)
-            storageUpdate = JSON.parse(storageUpdate)
+            const cartStorage = JSON.parse(localStorage.getItem("cart"))
+            const storageUpdate = cartStorage.find(element => element.key === itemKey)
             storageUpdate.quantity = Number(input.value)
-            localStorage.setItem(itemKey, JSON.stringify(storageUpdate))
+            localStorage.setItem("cart", JSON.stringify(cartStorage))
             cart = getItems()
             createTotal(data)
         });

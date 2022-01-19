@@ -58,18 +58,20 @@ function createColors (colors) {
 /**
  * Check if the chosen product is already in the cart with the choosen color,
  * then update the quantity if so, or create it if not
- * @param {string} key 
  * @param {object} product 
  */
- function cartUpdate(key, product) {
-    if (localStorage.getItem(key) === null) {
-        localStorage.setItem(key, JSON.stringify(product))
-        } else {
-        let storageUpdate = localStorage.getItem(key)
-        storageUpdate = JSON.parse(storageUpdate)
-        storageUpdate.quantity += product.quantity
-        localStorage.setItem(key, JSON.stringify(storageUpdate))
+ function cartUpdate(product) {
+    let cartStorage = []
+    if (localStorage.getItem("cart") === null) localStorage.setItem("cart", JSON.stringify(cartStorage))
+    cartStorage = localStorage.getItem("cart")
+    cartStorage = JSON.parse(cartStorage)
+    const cartUpdate = cartStorage.findIndex(element => element.key === product.key)
+    if (cartUpdate === -1) {
+        cartStorage.push(product)
+    } else {
+        cartStorage[cartUpdate].quantity += product.quantity
     }
+    localStorage.setItem("cart", JSON.stringify(cartStorage))
 }
 
 /**
@@ -86,7 +88,8 @@ function createColors (colors) {
 }
 
 /**
- * Add a click event on the button to pass the product objet in the local storage
+ * Add a click event on the button to check if the color and quantity are filled
+ * and then pass the product objet in the local storage if so
  * @param {object} kanap 
  */
 function buttonClick (kanap) {
@@ -96,13 +99,13 @@ function buttonClick (kanap) {
             id: kanap._id,
             color: document.querySelector("#colors").value,
             quantity: Number(document.querySelector("#quantity").value),
+            key: id + document.querySelector("#colors").value
         }
-        const key = id + product.color
-        if (product.quantity != 0 && product.color != "") {
-            cartUpdate(key, product)
-        } else {
+        if (product.quantity === 0 || product.color === "") {
             alert("Veuillez définir une couleur et une quantité")
+            return
         }
+        cartUpdate(product)
     }, false )
 }
 
