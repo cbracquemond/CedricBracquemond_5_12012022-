@@ -109,13 +109,17 @@ function buttonClick (kanap) {
             alert("Veuillez choisir une couleur")
             return
         }
-        if (product.quantity < 1) {
-            alert("Veuillez définir une quantité valide")
+        if (product.quantity === 0) {
+            alert("Veuillez définir une quantité")
+            return
+        }
+        if (product.quantity < 1 || product.quantity > 99) {
+            alert("La quantité doit être comprise entre 1 et 99")
             return
         }
         cartUpdate(product)
         alert("le produit a bien été rajouté à votre panier")
-    }, false )
+    })
 }
 
 /**
