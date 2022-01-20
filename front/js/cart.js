@@ -1,7 +1,9 @@
 let cart = []
 
 /**
- * Create a cart array with the localStorage data
+ * Create a cart array : each product object in it is a pair with the localStorage element 
+ * and it's data in the api
+ * @param {array} data
  * @returns {array} cart
  */
 function getItems(data) {
@@ -10,34 +12,39 @@ function getItems(data) {
 
 	//catch error if cart empty or not created in localStorage before loading
 	try {
-		cartStorage.forEach((element) => {
+		cartStorage.forEach((item) => {
             const product = {
-                item: element,
-                kanap: findKanap(element, data)
+                item: item,
+                kanap: findKanap(item, data)
             }
 			cart.push(product)
 		})
 	} catch (error) {
 		console.log(error)
-		console.log("cart empty or not created")
+		console.log("Cart empty or not created")
 	}
 	return cart
 }
 
 /**
  * search in the data the object corresponding to the item in the cart
- * @param {array} item
+ * @param {object} item
  * @param {array} data
  * @returns {object} kanap
  */
-function findKanap(product, data) {
-	const kanap = data.find((element) => element._id === product.id)
+function findKanap(item, data) {
+	const kanap = data.find((element) => element._id === item.id)
 	return kanap
 }
 
 /**
  *  create the Article HTMLElement
- * @param {array} item
+ * @param {object} product
+ * @param {object} product.item
+ * @param {string} item.color
+ * @param {string} item.id
+ * @param {string} item.key
+ * @param {number} item.quantity
  * @returns {HTMLElement} article
  */
 function createArticle(product) {
@@ -50,7 +57,15 @@ function createArticle(product) {
 
 /**
  * Create the div containing the product image, then the image, and put the image in the div
- * @param {object} kanap
+ * @param {object} product
+ * @param {object} product.kanap
+ * @param {object} kanap.colors
+ * @param {object} kanap._id
+ * @param {object} kanap.name
+ * @param {object} kanap.price
+ * @param {object} kanap.imageUrl
+ * @param {object} kanap.description
+ * @param {object} kanap.altTxt
  * @returns {HTMLElement} slot
  */
 function createImage(product) {
@@ -78,8 +93,20 @@ function createItemContent() {
 /**
  * Create the itemDescription div, then the name,
  * price and color of the item, and append them to the description
- * @param {array} item
- * @param {object} kanap
+ * @param {object} product
+ * @param {object} product.item
+ * @param {string} item.color
+ * @param {string} item.id
+ * @param {string} item.key
+ * @param {number} item.quantity
+ * @param {object} product.kanap
+ * @param {object} kanap.colors
+ * @param {object} kanap._id
+ * @param {object} kanap.name
+ * @param {object} kanap.price
+ * @param {object} kanap.imageUrl
+ * @param {object} kanap.description
+ * @param {object} kanap.altTxt
  * @returns {HTMLElement} description
  */
 function createItemDescription(product) {
@@ -112,7 +139,12 @@ function createQte() {
 
 /**
  * Create the input HTMLInputElement and set its attributes
- * @param {array} item
+ * @param {object} product
+ * @param {object} product.item
+ * @param {string} item.color
+ * @param {string} item.id
+ * @param {string} item.key
+ * @param {number} item.quantity
  * @returns {HTMLInputElement} input
  */
 function createInput(product) {
@@ -129,7 +161,7 @@ function createInput(product) {
 /**
  * Create the quantity div, and append it the Qte HTMLParagraphElement and
  * the input HTMLInputElement
- * @param {array} item
+ * @param {object} product
  * @returns {HTMLElement} quantity
  */
 function createQuantity(product) {
@@ -158,7 +190,6 @@ function createDeleteDiv() {
 /**
  * Loop through the cart to create the totalQuantity and totalPrice and put them in their
  * HTMLElement as innerText
- * @param {array} data
  */
 function createTotal() {
 	let totalQuantity = 0
@@ -175,7 +206,7 @@ function createTotal() {
 
 /**
  * Create the setting HTMLElement, and append to it the quantity and deleteDiv HTMLElement
- * @param {array} item
+ * @param {object} product
  * @returns {HTMLElement} setting
  */
 function createItemSetting(product) {
@@ -301,8 +332,9 @@ function makeRequestBody(form) {
 /**
  * Target the cart__item section, and call all the relevant function
  * to create and append all the necessary elements to it
- * @param {array} item
- * @param {object} kanap
+ * @param {object} product
+ * @param {object} product.item
+ * @param {object} product.kanap
  */
 function createProducts(product) {
 	const section = document.querySelector("#cart__items")
@@ -319,7 +351,12 @@ function createProducts(product) {
 /**
  * Make an eventListener for each "supprimer" div, which delete the item
  * from the cart page, the cart, the localStorage
- * @param {array} item
+ * @param {object} product
+ * @param {object} product.item
+ * @param {string} item.color
+ * @param {string} item.id
+ * @param {string} item.key
+ * @param {number} item.quantity
  * @param {array} data
  */
 function deleteProduct(product, data) {
@@ -417,10 +454,10 @@ function initCart() {
 			})
 			updateQuantity(data)
             createTotal()
+            submitOrder()
 		})
 		.catch((reject) => console.log(reject))
     }
-    submitOrder()
 
 /**
  * If the user is on the confirmation page, display the order id by
