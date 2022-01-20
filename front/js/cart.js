@@ -1,23 +1,26 @@
-let cart = getItems()
+let cart = []
 
 /**
  * Create a cart array with the localStorage data
  * @returns {array} cart
  */
-function getItems() {
+function getItems(data) {
 	const cart = []
 	let cartStorage = JSON.parse(localStorage.getItem("cart"))
 
 	//catch error if cart empty or not created in localStorage before loading
 	try {
-		cartStorage.forEach((item) => {
-			cart.push(item)
+		cartStorage.forEach((element) => {
+            const product = {
+                item: element,
+                kanap: findKanap(element, data)
+            }
+			cart.push(product)
 		})
 	} catch (error) {
 		console.log(error)
 		console.log("cart empty or not created")
 	}
-
 	return cart
 }
 
@@ -27,8 +30,8 @@ function getItems() {
  * @param {array} data
  * @returns {object} kanap
  */
-function findKanap(item, data) {
-	const kanap = data.find((element) => element._id === item.id)
+function findKanap(product, data) {
+	const kanap = data.find((element) => element._id === product.id)
 	return kanap
 }
 
@@ -37,11 +40,11 @@ function findKanap(item, data) {
  * @param {array} item
  * @returns {HTMLElement} article
  */
-function createArticle(item) {
+function createArticle(product) {
 	const article = document.createElement("article")
 	article.classList.add("cart__item")
-	article.dataset.id = item.id
-	article.dataset.color = item.color
+	article.dataset.id = product.item.id
+	article.dataset.color = product.item.color
 	return article
 }
 
@@ -50,13 +53,13 @@ function createArticle(item) {
  * @param {object} kanap
  * @returns {HTMLElement} slot
  */
-function createImage(kanap) {
+function createImage(product) {
 	const slot = document.createElement("div")
 	const image = document.createElement("img")
 
 	slot.classList.add("cart__item__img")
-	image.src = kanap.imageUrl
-	image.alt = kanap.altTxt
+	image.src = product.kanap.imageUrl
+	image.alt = product.kanap.altTxt
 	slot.appendChild(image)
 
 	return slot
@@ -79,16 +82,16 @@ function createItemContent() {
  * @param {object} kanap
  * @returns {HTMLElement} description
  */
-function createItemDescription(item, kanap) {
+function createItemDescription(product) {
 	const h2 = document.createElement("h2")
 	const color = document.createElement("p")
 	const price = document.createElement("p")
 	const description = document.createElement("div")
 
 	description.classList.add("cart__item__content__description")
-	h2.innerText = `${kanap.name}`
-	color.innerText = `${item.color}`
-	price.innerText = `${kanap.price} €`
+	h2.innerText = `${product.kanap.name}`
+	color.innerText = `${product.item.color}`
+	price.innerText = `${product.kanap.price} €`
 
 	description.appendChild(h2)
 	description.appendChild(color)
@@ -112,14 +115,14 @@ function createQte() {
  * @param {array} item
  * @returns {HTMLInputElement} input
  */
-function createInput(item) {
+function createInput(product) {
 	const input = document.createElement("input")
 	input.type = "number"
 	input.classList.add("itemQuantity")
 	input.name = "itemQuantity"
 	input.min = 1
 	input.max = 100
-	input.value = item.quantity
+	input.value = product.item.quantity
 	return input
 }
 
@@ -129,8 +132,8 @@ function createInput(item) {
  * @param {array} item
  * @returns {HTMLElement} quantity
  */
-function createQuantity(item) {
-	const input = createInput(item)
+function createQuantity(product) {
+	const input = createInput(product)
 	const quantity = document.createElement("div")
 	quantity.classList.add("cart__item__content__settings__quantity")
 	quantity.appendChild(createQte())
@@ -157,14 +160,13 @@ function createDeleteDiv() {
  * HTMLElement as innerText
  * @param {array} data
  */
-function createTotal(data) {
+function createTotal() {
 	let totalQuantity = 0
 	let totalPrice = 0
 
-	cart.forEach((item) => {
-		totalQuantity += item.quantity
-		const kanap = findKanap(item, data)
-		totalPrice += item.quantity * kanap.price
+	cart.forEach((product) => {
+		totalQuantity += product.item.quantity
+		totalPrice += product.item.quantity * product.kanap.price
 	})
 
 	document.querySelector("#totalQuantity").innerText = totalQuantity
@@ -176,10 +178,10 @@ function createTotal(data) {
  * @param {array} item
  * @returns {HTMLElement} setting
  */
-function createItemSetting(item) {
+function createItemSetting(product) {
 	const setting = document.createElement("div")
 	setting.classList.add("cart__item__content__settings")
-	setting.appendChild(createQuantity(item))
+	setting.appendChild(createQuantity(product))
 	setting.appendChild(createDeleteDiv())
 	return setting
 }
@@ -225,14 +227,8 @@ function checkValues(form) {
 	const regexList = new Map()
 	let isChecked = []
 
-	regexList.set(
-		"firstName",
-		/^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%^&*(){}|~<>;:[\]]{2,}$/
-	)
-	regexList.set(
-		"lastName",
-		/^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%^&*(){}|~<>;:[\]]{2,}$/
-	)
+	regexList.set("firstName",/^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%^&*(){}|~<>;:[\]]{2,}$/)
+	regexList.set("lastName",/^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%^&*(){}|~<>;:[\]]{2,}$/)
 	regexList.set("address", /^.*$/)
 	regexList.set("city", /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%^&*(){}|~<>;:[\]]{2,}$/)
 	regexList.set("email", /^[^\s@]+@[^\s@]+\.[^\s@]+$/)
@@ -263,8 +259,8 @@ function checkValues(form) {
  */
 function createProductsArray() {
 	let products = []
-	cart.forEach((item) => {
-		products.push(item.id)
+	cart.forEach((product) => {
+		products.push(product.item.id)
 	})
 	return products
 }
@@ -308,17 +304,16 @@ function makeRequestBody(form) {
  * @param {array} item
  * @param {object} kanap
  */
-function createProducts(item, data) {
-	const kanap = findKanap(item, data)
+function createProducts(product) {
 	const section = document.querySelector("#cart__items")
-	const article = createArticle(item)
+	const article = createArticle(product)
 	const content = createItemContent()
 
 	section.appendChild(article)
-	article.appendChild(createImage(kanap))
+	article.appendChild(createImage(product))
 	article.appendChild(content)
-	content.appendChild(createItemDescription(item, kanap))
-	content.appendChild(createItemSetting(item))
+	content.appendChild(createItemDescription(product))
+	content.appendChild(createItemSetting(product))
 }
 
 /**
@@ -327,25 +322,25 @@ function createProducts(item, data) {
  * @param {array} item
  * @param {array} data
  */
-function deleteProduct(item, data) {
+function deleteProduct(product, data) {
 	const button = document.querySelector(
-		`.cart__item[data-id="${item.id}"].cart__item[data-color="${item.color}"] .cart__item__content__settings__delete`
+		`.cart__item[data-id="${product.item.id}"].cart__item[data-color="${product.item.color}"] .cart__item__content__settings__delete`
 	)
 	button.addEventListener("click", (event) => {
+        let cartStorage = JSON.parse(localStorage.getItem("cart"))
 		const article = event.target.closest(".cart__item")
 		const itemKey =
 			article.getAttribute("data-id") + article.getAttribute("data-color")
 		const itemIndex = cartStorage.findIndex(
 			(element) => element.key === itemKey
 		)
-		let cartStorage = JSON.parse(localStorage.getItem("cart"))
 
 		article.remove()
 		cartStorage.splice(itemIndex, 1)
 		localStorage.setItem("cart", JSON.stringify(cartStorage))
 
-		cart = getItems()
-		createTotal(data)
+		cart = getItems(data)
+		createTotal()
 	})
 }
 
@@ -367,7 +362,7 @@ function updateQuantity(data) {
 			)
 			storageUpdate.quantity = Number(input.value)
 			localStorage.setItem("cart", JSON.stringify(cartStorage))
-			cart = getItems()
+			cart = getItems(data)
 			createTotal(data)
 		})
 	})
@@ -415,16 +410,17 @@ function initCart() {
 	fetch(`http://localhost:3000/api/products/`)
 		.then((response) => response.json())
 		.then((data) => {
-			cart.forEach((item) => {
-				createProducts(item, data)
-				deleteProduct(item, data)
+            cart = getItems(data)
+			cart.forEach((product) => {
+				createProducts(product)
+				deleteProduct(product, data)
 			})
-			createTotal(data)
 			updateQuantity(data)
-			submitOrder()
+            createTotal()
 		})
 		.catch((reject) => console.log(reject))
-}
+    }
+    submitOrder()
 
 /**
  * If the user is on the confirmation page, display the order id by
