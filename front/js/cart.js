@@ -7,9 +7,14 @@ let cart = getItems()
  function getItems () {
     const cart = []
     let cartStorage = JSON.parse(localStorage.getItem("cart"))
+
+    //prevent error if cart is empty
+    if (cartStorage.length === 0) return cart
+
     cartStorage.forEach(item => {
         cart.push(item)
     })
+
     return cart
 }
 
@@ -71,13 +76,13 @@ function createItemContent () {
  * @returns {HTMLElement} description
  */
 function createItemDescription (item, kanap) {
+    const h2 = document.createElement("h2")
+    const color = document.createElement("p")
+    const price = document.createElement("p")
     const description = document.createElement("div")
     description.classList.add("cart__item__content__description")
-    const h2 = document.createElement("h2")
     h2.innerText = `${kanap.name}`
-    const color = document.createElement("p")
     color.innerText = `${item.color}`
-    const price = document.createElement("p")
     price.innerText = `${kanap.price} €`
     description.appendChild(h2)
     description.appendChild(color)
