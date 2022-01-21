@@ -53,17 +53,24 @@ function createColors(colors) {
 }
 
 /**
+ * Create the cart key in the localStorage if not already present
+ * @param {Array} cartStorage 
+ */
+function cartCheck(cartStorage) {
+	if (localStorage.getItem("cart") === null) {
+		localStorage.setItem("cart", JSON.stringify(cartStorage))
+	}
+}
+
+/**
  * Check if the chosen product is already in the cart with the choosen color,
  * then update the quantity if so, or create it if not
  * @param {object} product
  */
 function cartUpdate(product) {
 	let cartStorage = []
-
-	//Create the cart key in the localStorage if not already present
-	if (localStorage.getItem("cart") === null)
-		localStorage.setItem("cart", JSON.stringify(cartStorage))
-
+	cartCheck(cartStorage)
+	
 	cartStorage = localStorage.getItem("cart")
 	cartStorage = JSON.parse(cartStorage)
 
