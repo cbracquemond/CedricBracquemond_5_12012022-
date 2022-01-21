@@ -4,7 +4,7 @@
  * @returns HTMLAnchorElement
  */
 function makeAnchor(id) {
-	const items = document.getElementById("items")
+	const items = document.querySelector("#items")
 	const a = document.createElement("a")
 	a.href = `./product.html?id=${id}`
 	items.appendChild(a)
@@ -64,10 +64,10 @@ function makeParagraph(description) {
 
 /**
  * Create all the products cards with functioning anchors
- * @param {object} kanaps
+ * @param {Array} data
  */
-function createProducts(kanaps) {
-	kanaps.forEach((kanap) => {
+function createProducts(data) {
+	data.forEach((kanap) => {
 		const { _id, name, imageUrl, altTxt, description } = kanap
 		const anchor = makeAnchor(_id)
 		const article = makeArticle(anchor)
