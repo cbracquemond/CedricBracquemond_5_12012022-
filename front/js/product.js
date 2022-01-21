@@ -39,6 +39,45 @@ function setDescription(description) {
 }
 
 /**
+ * Create the cart key in the localStorage if not already present
+ * @param {Array} cartStorage 
+ */
+ function cartCheck(cartStorage) {
+	if (localStorage.getItem("cart") === null) {
+		localStorage.setItem("cart", JSON.stringify(cartStorage))
+	}
+}
+
+/**
+ * Checks if the the user selected a color and a valid quantity
+ * @param {object} product
+ * @param {string} product.id
+ * @param {string} product.color
+ * @param {number} product.quantity
+ * @param {string} product.key
+ * @returns {boolean}
+ */
+function productCheck(product) {
+	if (product.quantity === 0 && product.color === "") {
+		alert("Veuillez définir une couleur et une quantité")
+		return false
+	}
+	if (product.color === "") {
+		alert("Veuillez choisir une couleur")
+		return false
+	}
+	if (product.quantity === 0) {
+		alert("Veuillez définir une quantité")
+		return false
+	}
+	if (product.quantity < 1 || product.quantity > 99) {
+		alert("La quantité doit être comprise entre 1 et 99")
+		return false
+	}
+	return true
+}
+
+/**
  * Create all the colors for the product and put them in the colors menu
  * @param {string} colors
  */
@@ -53,19 +92,13 @@ function createColors(colors) {
 }
 
 /**
- * Create the cart key in the localStorage if not already present
- * @param {Array} cartStorage 
- */
-function cartCheck(cartStorage) {
-	if (localStorage.getItem("cart") === null) {
-		localStorage.setItem("cart", JSON.stringify(cartStorage))
-	}
-}
-
-/**
  * Check if the chosen product is already in the cart with the choosen color,
  * then update the quantity if so, or create it if not
  * @param {object} product
+ * @param {string} product.id
+ * @param {string} product.color
+ * @param {number} product.quantity
+ * @param {string} product.key
  */
 function cartUpdate(product) {
 	let cartStorage = []
@@ -108,7 +141,6 @@ function constructPage(kanap) {
  */
 function buttonClick(kanap) {
 	const button = document.querySelector("#addToCart")
-
 	button.addEventListener("click", (e) => {
         const id = kanap._id
 		const product = {
@@ -117,22 +149,7 @@ function buttonClick(kanap) {
 			quantity: Number(document.querySelector("#quantity").value),
 			key: id + document.querySelector("#colors").value,
 		}
-		if (product.quantity === 0 && product.color === "") {
-			alert("Veuillez définir une couleur et une quantité")
-			return
-		}
-		if (product.color === "") {
-			alert("Veuillez choisir une couleur")
-			return
-		}
-		if (product.quantity === 0) {
-			alert("Veuillez définir une quantité")
-			return
-		}
-		if (product.quantity < 1 || product.quantity > 99) {
-			alert("La quantité doit être comprise entre 1 et 99")
-			return
-		}
+		if (!productCheck(product)) return 
 		cartUpdate(product)
 		alert("le produit a bien été rajouté à votre panier")
 	})
