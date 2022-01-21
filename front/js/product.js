@@ -103,20 +103,17 @@ function createColors(colors) {
 function cartUpdate(product) {
 	let cartStorage = []
 	cartCheck(cartStorage)
-	
 	cartStorage = localStorage.getItem("cart")
 	cartStorage = JSON.parse(cartStorage)
-
 	//Search through the cart if the product is already there with the same
 	//color, return the index if so
-	const cartUpdate = cartStorage.findIndex(
+	const cartIndex = cartStorage.findIndex(
 		(element) => element.key === product.key
 	)
-
-	if (cartUpdate === -1) {
+	if (cartIndex === -1) {
 		cartStorage.push(product)
 	} else {
-		cartStorage[cartUpdate].quantity += product.quantity
+		cartStorage[cartIndex].quantity += product.quantity
 	}
 	localStorage.setItem("cart", JSON.stringify(cartStorage))
 }
@@ -149,6 +146,7 @@ function buttonClick(kanap) {
 			quantity: Number(document.querySelector("#quantity").value),
 			key: id + document.querySelector("#colors").value,
 		}
+		//Prevent the product to be added if the color or the quantity is not filled
 		if (!productCheck(product)) return 
 		cartUpdate(product)
 		alert("le produit a bien été rajouté à votre panier")
