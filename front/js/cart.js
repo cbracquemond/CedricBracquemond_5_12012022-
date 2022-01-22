@@ -392,11 +392,11 @@ function updateQuantity(data) {
 	inputs.forEach((input) => {
 		input.addEventListener("input", (event) => {
 			const article = event.target.closest(".cart__item")
-			const itemKey =
+			const inputKey =
 				article.getAttribute("data-id") + article.getAttribute("data-color")
 			const cartStorage = JSON.parse(localStorage.getItem("cart"))
 			const storageUpdate = cartStorage.find(
-				(element) => element.key === itemKey
+				(element) => element.key === inputKey
 			)
 			storageUpdate.quantity = Number(input.value)
 			localStorage.setItem("cart", JSON.stringify(cartStorage))
