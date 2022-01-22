@@ -416,13 +416,15 @@ function submitOrder() {
 	const orderButton = document.querySelector("#order")
 	orderButton.addEventListener("click", (event) => {
 		event.preventDefault()
-		const form = document.querySelector(".cart__order__form")
-		const body = makeRequestBody(form)
-
+		
 		//Prevent the sending of the form if the cart is empty
 		if (checkCart()) return
+
+		const form = document.querySelector(".cart__order__form")
 		//Prevent the sending of the form if not valid
 		if (!checkForm(form)) return
+		
+		const body = makeRequestBody(form)
 
 		fetch(`http://localhost:3000/api/products/order/`, {
 			method: "POST",
