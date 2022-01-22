@@ -1,6 +1,17 @@
 let cart = []
 
 /**
+ * search in the data the object corresponding to the item in the cart
+ * @param {object} item
+ * @param {array} data
+ * @returns {object} kanap
+ */
+function findKanap(item, data) {
+	const kanap = data.find((element) => element._id === item.id)
+	return kanap
+}
+
+/**
  * Create a cart array : each product object in it is a pair with the localStorage element 
  * and it's data in the api
  * @param {array} data
@@ -21,21 +32,11 @@ function getItems(data) {
 		})
 	} catch (error) {
 		console.log(error)
-		console.log("Cart empty or not created")
+		console.log("Cart not created")
 	}
 	return cart
 }
 
-/**
- * search in the data the object corresponding to the item in the cart
- * @param {object} item
- * @param {array} data
- * @returns {object} kanap
- */
-function findKanap(item, data) {
-	const kanap = data.find((element) => element._id === item.id)
-	return kanap
-}
 
 /**
  *  create the Article HTMLElement
@@ -43,7 +44,7 @@ function findKanap(item, data) {
  * @param {object} product.item
  * @param {string} item.color
  * @param {string} item.id
- * @param {string} item.key
+ * @param {string} item.key	
  * @param {number} item.quantity
  * @returns {HTMLElement} article
  */
@@ -452,8 +453,8 @@ function initCart() {
 				createProducts(product)
 				deleteProduct(product, data)
 			})
-			updateQuantity(data)
             createTotal()
+			updateQuantity(data)
             submitOrder()
 		})
 		.catch((reject) => console.log(reject))
