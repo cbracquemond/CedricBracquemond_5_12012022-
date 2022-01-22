@@ -141,7 +141,7 @@ function buttonClick(kanap) {
 	button.addEventListener("click", (e) => {
         const id = kanap._id
 		const product = {
-			id: kanap._id,
+			id: id,
 			color: document.querySelector("#colors").value,
 			quantity: Number(document.querySelector("#quantity").value),
 			key: id + document.querySelector("#colors").value,
